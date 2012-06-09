@@ -9,17 +9,17 @@ class BaseStruct(object):
 
     def __init__(self, *args):
         self._data = OrderedDict()
-    
-        for arg, value in izip_longest(self._fields, args, None):
+
+        for arg, value in izip_longest(self._fields, args, fillvalue=None):
             self._data[arg] = value
 
-    @staticmethod
+    @classmethod
     def parse(cls, fileobj):
         '''takes an opened file or file-like-object and returns a 
         parsed Header class'''
         header = fileobj.read(cls._struct.size)
         
-        return cls(cls._struct.unpack(header))
+        return cls(*cls._struct.unpack(header))
     
     @property
     def raw(self):
@@ -29,14 +29,16 @@ class BaseStruct(object):
         if name in self._fields:
             return self._data[name]
         else:
-            super(Header, self).__getattr__(name)
-    
+            raise AttributeError, name
+        
     def __setattr__(self, name, value):
         if name in self._fields:
             self._data[name] = value
         else:
-            super(Header, self).__setattr__(name)
+            object.__setattr__(self, name, value)
 
+    def __repr__(self):
+        return repr(self._data).replace('OrderedDict', self.__class__.__name__)
 
 
 class Header(BaseStruct):
@@ -58,9 +60,25 @@ class Header(BaseStruct):
     def version(self):
         return u'.'.join([unicode(self.version_major), unicode(self.version_minor)])
     
+    @version.setter
+    def version(self, version):
+        self.version_major, self.version_minor = map(int, version.split('.')) 
+        
     @property
     def user_version(self):
         return u'.'.join([unicode(self.user_version_major), unicode(self.user_version_minor)])
+    
+    @user_version.setter
+    def user_version(self, version):
+        self.user_version_major, self.user_version_minor = map(int, version.split('.')) 
+        
+    @property
+    def index_version(self):
+        return u'.'.join([unicode(self.index_version_major), unicode(self.index_version_minor)])
+    
+    @index_version.setter
+    def index_version(self, version):
+        self.index_version_major, self.index_version_minor = map(int, version.split('.')) 
     
 
 class Index70(BaseStruct):
