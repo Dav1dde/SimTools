@@ -57,15 +57,19 @@ class DBPF(object):
             if not fileobj.tell() == (self.header.holes_offset + self.header.holes_size):
                 raise ValueError('incorrect amount of data read, file to small?')
             
-    def _get_dir(self, fileobj): # TODO: Verify! Untestet!
+    def _get_dir(self, fileobj):
         for index in self.indices:
             if index.type_id == 0xe86b1eef:
                 DIR = dir(self.header.index_version)
+                if self.header.index_version == '7.0':
+                    records = index.size / 16
+                else:
+                    records = index.size / 20
 
                 fileobj.seek(index.location, SEEK_SET)
                 
-                for index in self.indices:
-                    self.DIR.append(DIR.parse(fileobj, index.location))                
+                for _ in xrange(records):
+                    self.DIR.append(DIR.parse(fileobj))                
                 
                 break
     

@@ -37,6 +37,15 @@ class BaseStruct(object):
         else:
             object.__setattr__(self, name, value)
 
+    def __cmp__(self, other):
+        if isinstance(other, BaseStruct):
+            return self._data == other._data
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self._data)
+
     def __repr__(self):
         return repr(self._data).replace('OrderedDict', self.__class__.__name__)
 
@@ -119,32 +128,15 @@ class DIR70(BaseStruct):
     _fields = ['type_id',
                'group_id',
                'instance_id',
-               'location',
                'size']
     
-    @classmethod
-    def parse(cls, fileobj, location):
-        data = list(cls._struct.unpack(fileobj.read(cls._struct.size)))
-        data.insert(-1, location)        
-        
-        return cls(*data)
-        
-
 class DIR71(BaseStruct):
     _struct = Struct('5I')
     _fields = ['type_id',
                'group_id',
                'instance_id',
                'instance_id2',
-               'location',
                'size']
-    
-    @classmethod
-    def parse(cls, fileobj, location):
-        data = list(cls._struct.unpack(fileobj.read(cls._struct.size)))
-        data.insert(-1, location)        
-        
-        return cls(*data)
 
 def dir(version):
     if isinstance(version, Header):
