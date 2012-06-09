@@ -1,4 +1,4 @@
-from dbpf.header import Header, index
+from dbpf.header import Header, Hole, index
 from os import SEEK_SET
 
 
@@ -34,5 +34,19 @@ class DBPF(object):
             Index = index(self.header.index_version)
             
             fileobj.seek(self.header.index_offset, SEEK_SET)
-            for i in xrange(self.header.index_count):
+            
+            for _ in xrange(self.header.index_count):
                 self.indices.append(Index.parse(fileobj))
+            
+            if not fileobj.tell() == (self.header.index_offset + self.header.index_size):
+                raise ValueError('incorrect amount of data read, file to small?')
+        
+        if self.header.holes_count >= 1:
+            fileobj.seek(self.header.holes_offset, SEEK_SET)
+            
+            for _ in xrange(self.header.holes_count):
+                self.holes.append(Hole.parse(fileobj))
+                
+            if not fileobj.tell() == (self.header.holes_offset + self.header.holes_size):
+                raise ValueError('incorrect amount of data read, file to small?')
+            
