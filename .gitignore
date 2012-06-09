@@ -4,3 +4,8 @@
 *.SC4Desc
 test.py
 *.pyc
+*.jpg
+*.jpeg
+*.qfs
+*.pl
+build/*

@@ -72,4 +72,4 @@ class DBPF(object):
                     self.DIR.append(DIR.parse(fileobj))                
                 
                 break
-    
+            
