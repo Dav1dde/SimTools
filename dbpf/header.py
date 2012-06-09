@@ -42,7 +42,7 @@ class BaseStruct(object):
 
 
 class Header(BaseStruct):
-    _struct = Struct('<4s17i24s')
+    _struct = Struct('4s17i24s')
     _fields = ('magic',
                'version_major', 'version_minor',
                'user_version_major', 'user_version_minor',
@@ -82,7 +82,7 @@ class Header(BaseStruct):
     
 
 class Index70(BaseStruct):
-    _struct = Struct('<5i')
+    _struct = Struct('5I')
     _fields = ['type_id',
                'group_id',
                'instance_id',
@@ -90,7 +90,7 @@ class Index70(BaseStruct):
                'size']
     
 class Index71(BaseStruct):
-    _struct = Struct('<6i')
+    _struct = Struct('6I')
     _fields = ['type_id',
                'group_id',
                'instance_id',
@@ -110,12 +110,12 @@ def index(version):
         raise NotImplementedError('Version not implemented.')
     
 class Hole(BaseStruct):
-    _struct = Struct('<2i')
+    _struct = Struct('2I')
     _fields = ['location',
                'size']
 
 class DIR70(BaseStruct):
-    _struct = Struct('<4i')
+    _struct = Struct('4I')
     _fields = ['type_id',
                'group_id',
                'instance_id',
@@ -131,7 +131,7 @@ class DIR70(BaseStruct):
         
 
 class DIR71(BaseStruct):
-    _struct = Struct('<5i')
+    _struct = Struct('5I')
     _fields = ['type_id',
                'group_id',
                'instance_id',
