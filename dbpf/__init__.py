@@ -1,4 +1,4 @@
-from dbpf.header import Header, Hole, index
+from dbpf.header import Header, Hole, index, dir
 from os import SEEK_SET
 
 
@@ -9,6 +9,7 @@ class DBPF(object):
         self.header = None
         self.indices = []
         self.holes = []
+        self.DIR = []
         
         if not file is None:
             self.parse_file(file)
@@ -29,7 +30,12 @@ class DBPF(object):
         
         if not self.header.version == '1.0':
             raise ValueError('DBPF Version not supported')
+        
+        self._extract_indices(fileobj)
+        self._extract_holes(fileobj)
+        self._get_dir(fileobj)
     
+    def _extract_indices(self, fileobj):
         if self.header.index_count >= 1:
             Index = index(self.header.index_version)
             
@@ -40,7 +46,8 @@ class DBPF(object):
             
             if not fileobj.tell() == (self.header.index_offset + self.header.index_size):
                 raise ValueError('incorrect amount of data read, file to small?')
-        
+    
+    def _extract_holes(self, fileobj):
         if self.header.holes_count >= 1:
             fileobj.seek(self.header.holes_offset, SEEK_SET)
             
@@ -50,3 +57,15 @@ class DBPF(object):
             if not fileobj.tell() == (self.header.holes_offset + self.header.holes_size):
                 raise ValueError('incorrect amount of data read, file to small?')
             
+    def _get_dir(self, fileobj): # TODO: Verify! Untestet!
+        for index in self.indices:
+            if index.type_id == 0xe86b1eef:
+                DIR = dir(self.header.index_version)
+
+                fileobj.seek(index.location, SEEK_SET)
+                
+                for index in self.indices:
+                    self.DIR.append(DIR.parse(fileobj, index.location))                
+                
+                break
+    

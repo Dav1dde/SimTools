@@ -1,6 +1,6 @@
 from struct import Struct
 from collections import OrderedDict
-from itertools import izip_longest
+from itertools import izip_longest, chain
 
 
 class BaseStruct(object):
@@ -16,10 +16,10 @@ class BaseStruct(object):
     @classmethod
     def parse(cls, fileobj):
         '''takes an opened file or file-like-object and returns a 
-        parsed Header class'''
-        header = fileobj.read(cls._struct.size)
+        parsed class'''
+        data = fileobj.read(cls._struct.size)
         
-        return cls(*cls._struct.unpack(header))
+        return cls(*cls._struct.unpack(data))
     
     @property
     def raw(self):
@@ -113,4 +113,46 @@ class Hole(BaseStruct):
     _struct = Struct('<2i')
     _fields = ['location',
                'size']
+
+class DIR70(BaseStruct):
+    _struct = Struct('<4i')
+    _fields = ['type_id',
+               'group_id',
+               'instance_id',
+               'location',
+               'size']
     
+    @classmethod
+    def parse(cls, fileobj, location):
+        data = list(cls._struct.unpack(fileobj.read(cls._struct.size)))
+        data.insert(-1, location)        
+        
+        return cls(*data)
+        
+
+class DIR71(BaseStruct):
+    _struct = Struct('<5i')
+    _fields = ['type_id',
+               'group_id',
+               'instance_id',
+               'instance_id2',
+               'location',
+               'size']
+    
+    @classmethod
+    def parse(cls, fileobj, location):
+        data = list(cls._struct.unpack(fileobj.read(cls._struct.size)))
+        data.insert(-1, location)        
+        
+        return cls(*data)
+
+def dir(version):
+    if isinstance(version, Header):
+        version = version.index_version
+    
+    if version in (7.0, '7.0'):
+        return DIR70
+    elif version in (7.1, '7.1'):
+        return DIR71
+    else:
+        raise NotImplementedError('Version not implemented.')
