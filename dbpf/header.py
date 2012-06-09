@@ -97,16 +97,18 @@ class Index71(BaseStruct):
                'instance2_id',
                'location',
                'size']
-    
+
 def index(version):
+    if isinstance(version, Header):
+        version = version.index_version
+    
     if version in (7.0, '7.0'):
         return Index70
     elif version in (7.1, '7.1'):
         return Index71
     else:
         raise NotImplementedError('Version not implemented.')
-
-
+    
 class Hole(BaseStruct):
     _struct = Struct('<2i')
     _fields = ['location',
