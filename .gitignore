@@ -1,3 +1,6 @@
 .project
 .pydevproject
+*.SC4Model
+*.SC4Desc
+test.py
 *.pyc
