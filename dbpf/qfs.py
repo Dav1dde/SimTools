@@ -1,18 +1,24 @@
-from os import SEEK_SET
 from struct import pack, unpack
+from io import BytesIO
+from collections import namedtuple
 
-def decompress_file(fileobj, position):
-    fileobj.seek(position, SEEK_SET)
+FileHeader = namedtuple('FileHeader', ['compressed_size', 'magic', 'size'])
+
+def decompress(data):
+    if not hasattr(data, 'read'):
+        data = BytesIO(data)
     
-    data = unpack('IH3B', fileobj.read(9))
-    compressed_size = data[0]
-    magic = hex(data[1])
-    uncompressed_size = data[2] << 16 | data[3] << 8 | data[4] << 8
+    header = unpack('IH3B', data.read(9))
+    compressed_size = header[0]
+    magic = header[1]
+    assert(magic == 0xfb10)
+    size = (header[2] << 16 | header[3] << 8 | header[4] << 8)
     
-    return decompress(fileobj, compressed_size, uncompressed_size)
+    return (FileHeader(compressed_size, magic, size),
+            _decompress(data, compressed_size, size))
     
 
-def decompress(fileobj, length, uncompressed_size):
+def _decompress(fileobj, length, uncompressed_size):
     result = ''
     
     while length > 0 and len(result) < uncompressed_size:

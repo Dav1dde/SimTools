@@ -1,13 +1,18 @@
 from struct import Struct
 from collections import OrderedDict
-from itertools import izip_longest, chain
+from itertools import izip_longest
+from os import SEEK_SET
+
+from dbpf.file import File, CompressedFile
 
 
 class BaseStruct(object):
     _struct = Struct('')
     _fields = []
 
-    def __init__(self, *args):
+    def __init__(self, fileobj, *args):
+        self._fileobj = fileobj
+        
         self._data = OrderedDict()
 
         for arg, value in izip_longest(self._fields, args, fillvalue=None):
@@ -19,7 +24,7 @@ class BaseStruct(object):
         parsed class'''
         data = fileobj.read(cls._struct.size)
         
-        return cls(*cls._struct.unpack(data))
+        return cls(fileobj, *cls._struct.unpack(data))
     
     @property
     def raw(self):
@@ -47,8 +52,11 @@ class BaseStruct(object):
         return hash(self._data)
 
     def __repr__(self):
-        return repr(self._data).replace('OrderedDict', self.__class__.__name__)
-
+        return '{}({})'.format(self.__class__.__name__,
+                               ', '.join('{}={}'.format(field, 
+                                                        getattr(self, field))
+                                         for field in self._fields))
+        
 
 class Header(BaseStruct):
     _struct = Struct('4s17i24s')
@@ -90,7 +98,31 @@ class Header(BaseStruct):
         self.index_version_major, self.index_version_minor = map(int, version.split('.')) 
     
 
-class Index70(BaseStruct):
+class IndexBaseStruct(BaseStruct):
+    def __init__(self, *args, **kwargs):
+        BaseStruct.__init__(self, *args, **kwargs)
+        
+        self.compressed = False
+        
+    def open(self):
+        self._fileobj.seek(self.location, SEEK_SET)
+        data = self._fileobj.read(self.size)
+        
+        if self.compressed:
+            return CompressedFile(self._fileobj)
+        else:
+            return File(self._fileobj)
+    
+    def __repr__(self):
+        fields = self._fields + ['compressed']
+        
+        a = ', '.join('{}={}'.format(field, getattr(self, field))
+                                     for field in fields)
+        return '{}({})'.format(self.__class__.__name__, a)
+                              
+        
+
+class Index70(IndexBaseStruct):
     _struct = Struct('5I')
     _fields = ['type_id',
                'group_id',
@@ -98,7 +130,7 @@ class Index70(BaseStruct):
                'location',
                'size']
     
-class Index71(BaseStruct):
+class Index71(IndexBaseStruct):
     _struct = Struct('6I')
     _fields = ['type_id',
                'group_id',
@@ -123,14 +155,20 @@ class Hole(BaseStruct):
     _fields = ['location',
                'size']
 
-class DIR70(BaseStruct):
+class DIRBaseStruct(BaseStruct):
+    def equals_index(self, index):
+        return all(getattr(self, field) == getattr(index, field)
+                   for field in self._fields[:-1])
+    
+
+class DIR70(DIRBaseStruct):
     _struct = Struct('4I')
     _fields = ['type_id',
                'group_id',
                'instance_id',
                'size']
     
-class DIR71(BaseStruct):
+class DIR71(DIRBaseStruct):
     _struct = Struct('5I')
     _fields = ['type_id',
                'group_id',
