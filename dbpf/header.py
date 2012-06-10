@@ -109,9 +109,9 @@ class IndexBaseStruct(BaseStruct):
         data = self._fileobj.read(self.size)
         
         if self.compressed:
-            return CompressedFile(self._fileobj)
+            return CompressedFile(data)
         else:
-            return File(self._fileobj)
+            return File(data)
     
     def __repr__(self):
         fields = self._fields + ['compressed']

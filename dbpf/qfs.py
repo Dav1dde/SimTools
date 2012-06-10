@@ -15,7 +15,7 @@ def decompress(data):
     size = (header[2] << 16 | header[3] << 8 | header[4] << 8)
     
     return (FileHeader(compressed_size, magic, size),
-            _decompress(data, compressed_size, size))
+            _decompress(data, compressed_size-9, size))
     
 
 def _decompress(fileobj, length, uncompressed_size):
