@@ -1,4 +1,4 @@
-from dbpf.header import Header, Hole, index, dir
+from simtools.dbpf import Header, Hole, index, dir
 from os import SEEK_SET
 
 class DBPF(object):

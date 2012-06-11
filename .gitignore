@@ -8,4 +8,5 @@ test.py
 *.jpeg
 *.qfs
 *.pl
+*.fsh
 build/*
