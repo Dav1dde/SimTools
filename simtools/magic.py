@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from simtools.file import File, S3DFile, ImageFile, FSHFile
+from simtools.file import File, XMLFile, S3DFile, ImageFile, FSHFile
 
 
 T = namedtuple('T', ['type', 'description', 'cls'])
@@ -18,7 +18,7 @@ TID = {0xbadb57f1 : T('S3D', 'SimGlide 3D Model', S3DFile),
        # own assumptions
        0x5ad0e187 : T('S3D', 'SimGlide 3D Model', S3DFile),
        0x7ab50e44 : T('FSH', 'Texture File', FSHFile),
-       0x88777601 : T('XML', 'XML File', File),
+       0x88777601 : T('XML', 'XML File', XMLFile),
        0x74807101 : T('JPEG', 'Compressed Image File', ImageFile),
        0x74807102 : T('JPEG', 'Compressed Image File', ImageFile),
        0x66778001 : T('BMP', 'Bitmap Image File', ImageFile),

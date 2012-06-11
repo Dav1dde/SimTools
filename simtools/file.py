@@ -6,20 +6,30 @@ from simtools import fsh
 from simtools.ext import squish
 
 class File(object):
+    _type = 'data'
+    
     def __init__(self, data):
         self.data = data
 
 
+class XMLFile(File):
+    _type = 'XML' 
+
+
 class S3DFile(File):
-    pass
+    _type = 'S3D'
 
 
 class ImageFile(File):
+    _type = ('BMP', 'JPEG')
+    
     def pil_image(self):
         return Image.open(BytesIO(self.data))
          
 
 class FSHFile(ImageFile):
+    _type = 'FSH'
+    
     def __init__(self, *args, **kwargs):
         File.__init__(self, *args, **kwargs)
         
