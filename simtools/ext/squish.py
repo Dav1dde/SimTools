@@ -1,4 +1,4 @@
-from ctypes import CDLL, c_ubyte, c_int, byref, create_string_buffer
+from ctypes import CDLL, c_int, byref, create_string_buffer
 import os.path
 
 libsquish_path = os.path.join(os.path.split(os.path.abspath(__file__))[0], 'libsquishc.so')

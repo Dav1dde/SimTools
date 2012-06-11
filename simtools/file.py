@@ -12,6 +12,10 @@ class File(object):
         self.data = data
 
 
+class DIRFile(File):
+    _type = 'DIR'
+
+
 class XMLFile(File):
     _type = 'XML' 
 

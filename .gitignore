@@ -9,4 +9,5 @@ test.py
 *.qfs
 *.pl
 *.fsh
+*.s3d
 build/*

@@ -1,12 +1,14 @@
 from collections import namedtuple
 
-from simtools.file import File, XMLFile, S3DFile, ImageFile, FSHFile
+from simtools.file import File, DIRFile, XMLFile, S3DFile, ImageFile, FSHFile
 
 
 T = namedtuple('T', ['type', 'description', 'cls'])
 
 
-TID = {0xbadb57f1 : T('S3D', 'SimGlide 3D Model', S3DFile),
+TID = {0xe86b1eef : T('DIR', 'Special Index Entry', DIRFile),
+       
+       0xbadb57f1 : T('S3D', 'SimGlide 3D Model', S3DFile),
        0x1abe787d : T('FSH', 'Texture File', FSHFile),
        0x0986135E : T('FSH', 'Base and Overlay Lot Textures', FSHFile),
        0x1ABE787D : T('FSH', 'Transit Textures/Buildings/Bridges/Misc', FSHFile),
