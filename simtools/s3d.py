@@ -4,13 +4,13 @@ from simtools.util import BaseStruct
 
 
 class Header(BaseStruct):
-    _struct = Struct('4sI')
+    _struct = Struct('<4sI')
     _fields = ['magic',
                'size']
 
 
 class Head(BaseStruct):
-    _struct = Struct('4sI2H')
+    _struct = Struct('<4sI2H')
     _fields = ['magic',
                'size',
                'version_major',
@@ -26,16 +26,19 @@ class Head(BaseStruct):
 
 
 class Vert(BaseStruct):
-    _struct = Struct('4s2I2HI')
+    _struct = Struct('<4s2I')
     _fields = ['magic',
                'size',
-               'vertex_groups',
-               'flags',
-               'vertices_per_group',
+               'groups']
+
+class VertexGroup(BaseStruct):
+    _struct = Struct('<2HI')
+    _fields = ['flags',
+               'vertices',
                'format']
 
 class Vertex(BaseStruct):
-    _struct = Struct('5f')
+    _struct = Struct('<5f')
     _fields = ['x',
                'y',
                'z',
@@ -44,29 +47,32 @@ class Vertex(BaseStruct):
 
 
 class Indx(BaseStruct):
-    _struct = Struct('4s2I3h')
+    _struct = Struct('<4s2I')
     _fields = ['magic',
                'size',
-               'vertex_groups',
-               'flags',
+               'groups']
+    
+class IndexGroup(BaseStruct):
+    _struct = Struct('<3H')
+    _fields = ['flags',
                'stride',
-               'vertices_per_group'] # / 3 to get the triangles
+               'vertices'] # / 3 to get the triangles]
     
 class Index(BaseStruct):
-    _struct = Struct('3H')
+    _struct = Struct('<3H')
     _fields = ['a',
                'b',
                'c']
     
     
 class Prim(BaseStruct):
-    _struct = Struct('4s2I')
+    _struct = Struct('<4s2I')
     _fields = ['magic',
                'size',
-               'primitive_groups']
+               'groups']
     
 class PrimGroup(BaseStruct):
-    _struct = Struct('H3I')
+    _struct = Struct('<H3I')
     _fields = ['primitives',
                'type',
                'vertex',
@@ -74,16 +80,16 @@ class PrimGroup(BaseStruct):
 
 
 class Mats(BaseStruct):
-    _struct = Struct('4s2I')
+    _struct = Struct('<4s2I')
     _fields = ['magic',
                'size',
-               'material_groups']
+               'groups']
 
 class Material(BaseStruct):
     pass
 
 class MaterialGTE15(Material):
-    _struct = Struct('I4BHI2BI4B2H')
+    _struct = Struct('<I4BHI2BI4B2H')
     _fields = ['flags',
                'alpha_func',
                'depth_func',
@@ -106,14 +112,14 @@ class MaterialGTE15(Material):
     def parse(cls, fileobj):
         data = cls._struct.unpack(fileobj.read(cls._struct.size))
         
-        name_length = unpack('B', fileobj.read(1))
-        name = unpack(str(name_length) + 's', fileobj.read(name_length)).lstrip('\x00')
+        name_length, = unpack('B', fileobj.read(1))
+        name = unpack(str(name_length) + 's', fileobj.read(name_length))[0].lstrip('\x00')
         
         return cls(fileobj, *(data + (name,)))
 
 
 class MaterialLT15(Material):
-    _struct = Struct('I4BHI2BI2B2H')
+    _struct = Struct('<I4BHI2BI2B2H')
     _fields = ['flags',
                'alpha_func',
                'depth_func',
@@ -134,24 +140,24 @@ class MaterialLT15(Material):
     def parse(cls, fileobj):
         data = cls._struct.unpack(fileobj.read(cls._struct.size))
         
-        name_length = unpack('B', fileobj.read(1))
-        name = unpack(str(name_length) + 's', fileobj.read(name_length)).lstrip('\x00')
+        name_length, = unpack('B', fileobj.read(1))
+        name = unpack(str(name_length) + 's', fileobj.read(name_length))[0].lstrip('\x00')
         
         return cls(fileobj, *(data + (name,)))
 
 
 class Anim(BaseStruct):
-    _struct = Struct('4sI3HIfH')
+    _struct = Struct('<4sI3HIfH')
     _fields = ['magic',
                'size',
                'frames_per_assignment_groups',
                'frame_rate',
-               'animation_mode',
+               'mode',
                'flags',
                'displacement',
-               'assignment_groups']
+               'groups']
 
-class AssignmentGroup(BaseStruct):
+class AnimationGroup(BaseStruct):
     _fields = ['name',
                'flags',
                'vertex_block_index',
@@ -161,19 +167,19 @@ class AssignmentGroup(BaseStruct):
 
     @classmethod
     def parse(cls, fileobj):
-        length = unpack('B', fileobj.read(1))
-        flags = unpack('B', fileobj.read(1))
-        name = unpack(str(length) + 's', fileobj.read(length)).lstrip('\x00')
+        length, = unpack('B', fileobj.read(1))
+        flags, = unpack('B', fileobj.read(1))
+        name = unpack(str(length) + 's', fileobj.read(length))[0].lstrip('\x00')
         indices = unpack('4H', fileobj.read(8))
         
         return cls(fileobj, name, flags, *indices)
 
 
 class Prop(BaseStruct):
-    _struct = Struct('4s2I')
+    _struct = Struct('<4s2I')
     _fields = ['magic',
                'size',
-               'property_groups']
+               'groups']
 
 class PropertyGroup(BaseStruct):
     _fields = ['mesh_index',
@@ -194,17 +200,17 @@ class PropertyGroup(BaseStruct):
 
 
 class Regp(BaseStruct):
-    _struct = Struct('4s2I')
+    _struct = Struct('<4s2I')
     _fields = ['magic',
                'size',
                'effects']
 
-class Effect(BaseStruct):
+class EffectGroup(BaseStruct):
     _fields = ['name',
-               'subgroups']
+               'effects']
 
-class EffectSubgroup('BaseStruct'):
-    _struct = Struct('3f4f') # TODO: verify
+class Effect(BaseStruct):
+    _struct = Struct('<3f4f') # TODO: verify
     _fields = ['translation_x',
                'translation_y',
                'translation_z',

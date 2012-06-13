@@ -18,7 +18,7 @@ TID = {0xe86b1eef : T('DIR', 'Special Index Entry', DIRFile),
        0x2A2458F9 : T('FSH', 'Animation Sprites (Props)', FSHFile),
        
        # own assumptions
-       0x5ad0e187 : T('S3D', 'SimGlide 3D Model', S3DFile),
+       0x5ad0e817 : T('S3D', 'SimGlide 3D Model', S3DFile),
        0x7ab50e44 : T('FSH', 'Texture File', FSHFile),
        0x88777601 : T('XML', 'XML File', XMLFile),
        0x74807101 : T('JPEG', 'Compressed Image File', ImageFile),
