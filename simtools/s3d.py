@@ -1,4 +1,4 @@
-from struct import Struct, unpack
+from struct import Struct, unpack, pack
 
 from simtools.util import BaseStruct
 
@@ -86,7 +86,19 @@ class Mats(BaseStruct):
                'groups']
 
 class Material(BaseStruct):
-    pass
+    @classmethod
+    def parse(cls, fileobj):
+        data = cls._struct.unpack(fileobj.read(cls._struct.size))
+        
+        name_length, = unpack('B', fileobj.read(1))
+        name = unpack(str(name_length) + 's', fileobj.read(name_length))[0].lstrip('\x00')
+        
+        return cls(fileobj, *(data + (name,)))
+    
+    def raw(self):
+        return self._struct.pack(self._data.values()[:14]) + \
+            pack('<B{}s'.format(len(self.name)+1), len(self.name)+1, self.name + '\x00')
+
 
 class MaterialGTE15(Material):
     _struct = Struct('<I4BHI2BI4B2H')
@@ -107,16 +119,7 @@ class MaterialGTE15(Material):
                'animation_rate',
                'animation_mode',
                'name']
-
-    @classmethod
-    def parse(cls, fileobj):
-        data = cls._struct.unpack(fileobj.read(cls._struct.size))
-        
-        name_length, = unpack('B', fileobj.read(1))
-        name = unpack(str(name_length) + 's', fileobj.read(name_length))[0].lstrip('\x00')
-        
-        return cls(fileobj, *(data + (name,)))
-
+    
 
 class MaterialLT15(Material):
     _struct = Struct('<I4BHI2BI2B2H')
@@ -135,15 +138,6 @@ class MaterialLT15(Material):
                'animation_rate',
                'animation_mode',
                'name']
-
-    @classmethod
-    def parse(cls, fileobj):
-        data = cls._struct.unpack(fileobj.read(cls._struct.size))
-        
-        name_length, = unpack('B', fileobj.read(1))
-        name = unpack(str(name_length) + 's', fileobj.read(name_length))[0].lstrip('\x00')
-        
-        return cls(fileobj, *(data + (name,)))
 
 
 class Anim(BaseStruct):
@@ -174,6 +168,12 @@ class AnimationGroup(BaseStruct):
         
         return cls(fileobj, name, flags, *indices)
 
+    def raw(self):
+        return pack('<BB{}s4H'.format(len(self.name)+1),
+                    self.flags, len(self.name)+1, self.name + '\x00',
+                    self.vertex_block_index, self.index_block_index,
+                    self.primitive_block_index, self.material_block_index)
+
 
 class Prop(BaseStruct):
     _struct = Struct('<4s2I')
@@ -197,6 +197,13 @@ class PropertyGroup(BaseStruct):
         property_name = unpack(str(property_name_length) + 's', fileobj.read(property_name_length)).lstrip('\x00')
         
         return cls(fileobj, mesh_index, frame_number, type, property_name)
+
+    def raw(self):
+        return pack('<2HB{}sB{}s'.format(len(self.type) + 1,
+                                         len(self.property) + 1),
+                    self.mesh_index, self.frame_number,
+                    len(self.type)+1, self.type + '\x00',
+                    len(self.property_name)+1, self.property_name + '\x00')
 
 
 class Regp(BaseStruct):
