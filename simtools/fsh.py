@@ -4,7 +4,7 @@ from simtools.util import BaseStruct
 
 
 class Header(BaseStruct):
-    _struct = Struct('4s2I4s')
+    _struct = Struct('<4s2I4s')
     _fields = ['magic',
                'file_size',
                'entry_count',
@@ -12,13 +12,13 @@ class Header(BaseStruct):
 
 
 class Directory(BaseStruct):
-    _struct = Struct('4sI')
+    _struct = Struct('<4sI')
     _fields = ['entry_name',
                'offset']
     
 
 class EntryHeader(BaseStruct):
-    _struct = Struct('b3b6H')
+    _struct = Struct('<b3b6H')
     _fields = ['record_id',
                'size1',
                'size2',

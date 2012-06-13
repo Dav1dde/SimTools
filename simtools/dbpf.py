@@ -7,7 +7,7 @@ from simtools.magic import magic_index
 
 
 class Header(BaseStruct):
-    _struct = Struct('4s17i24s')
+    _struct = Struct('<4s17i24s')
     _fields = ('magic',
                'version_major', 'version_minor',
                'user_version_major', 'user_version_minor',
@@ -73,7 +73,7 @@ class IndexBaseStruct(BaseStruct):
         
 
 class Index70(IndexBaseStruct):
-    _struct = Struct('5I')
+    _struct = Struct('<5I')
     _fields = ['type_id',
                'group_id',
                'instance_id',
@@ -81,7 +81,7 @@ class Index70(IndexBaseStruct):
                'size']
     
 class Index71(IndexBaseStruct):
-    _struct = Struct('6I')
+    _struct = Struct('<6I')
     _fields = ['type_id',
                'group_id',
                'instance_id',
@@ -101,7 +101,7 @@ def index(version):
         raise NotImplementedError('Version not implemented.')
     
 class Hole(BaseStruct):
-    _struct = Struct('2I')
+    _struct = Struct('<2I')
     _fields = ['location',
                'size']
 
@@ -112,14 +112,14 @@ class DIRBaseStruct(BaseStruct):
     
 
 class DIR70(DIRBaseStruct):
-    _struct = Struct('4I')
+    _struct = Struct('<4I')
     _fields = ['type_id',
                'group_id',
                'instance_id',
                'size']
     
 class DIR71(DIRBaseStruct):
-    _struct = Struct('5I')
+    _struct = Struct('<5I')
     _fields = ['type_id',
                'group_id',
                'instance_id',

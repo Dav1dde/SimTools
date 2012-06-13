@@ -170,7 +170,7 @@ class AnimationGroup(BaseStruct):
         length, = unpack('B', fileobj.read(1))
         flags, = unpack('B', fileobj.read(1))
         name = unpack(str(length) + 's', fileobj.read(length))[0].lstrip('\x00')
-        indices = unpack('4H', fileobj.read(8))
+        indices = unpack('<4H', fileobj.read(8))
         
         return cls(fileobj, name, flags, *indices)
 
