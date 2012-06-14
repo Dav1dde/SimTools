@@ -72,8 +72,16 @@ def _decompress(fileobj, length, uncompressed_size):
 
 def compress(data):
     if hasattr(data, 'read'):
-        data = BytesIO(data)
-        
+        data = data.read()
+    
+    compressed = _compress(data)
+    compressed_size = len(compressed) + 9 # 9 = size of header
+    magic = 0xfb10
+    size = len(data) & 0xffffff
+    header = pack('<IH3B', compressed_size, magic,
+                  (size & 0xff0000) >> 16, (size & 0x00ff00) >> 8, size & 0x0000ff)
+    
+    return ''.join([header, compressed])
 
 def _compress(data):
     # lz77 algorithm based on (14.6.2012):
@@ -94,7 +102,6 @@ def _compress(data):
     
 
     while pos < end:
-        
         match_length = min_match_length
         search_start = max(pos - window_length, 0)
         best_match_distance = max_string_length
@@ -201,8 +208,15 @@ if __name__ == '__main__':
     data = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789abcefghijklmno'
     print data, len(data)
     compressed = _compress(data)
-    print repr(compressed)
+    print repr(compressed), len(compressed)
     decompressed = _decompress(BytesIO(compressed), len(compressed), len(data))
     print decompressed
-        
+    assert(data == decompressed)
+    
+    c = compress(data)
+    print repr(c)
+    header, uc = decompress(c)
+    print uc
+    print header
+    assert(data == uc)
     
