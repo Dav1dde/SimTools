@@ -5,6 +5,8 @@ from PIL import Image
 from simtools import s3d
 from simtools import fsh
 from simtools.ext import squish
+from simtools.util import enforce
+
 
 class File(object):
     _type = 'data'
@@ -53,6 +55,7 @@ class S3DFile(File):
         self.head = s3d.Head.parse(io)
         
         self.vert = s3d.Vert.parse(io)
+        enforce(self.vert.magic == 'VERT', ValueError, 'magic number mismatch')
         for _ in xrange(self.vert.groups):
             group = s3d.VertexGroup.parse(io)
             
@@ -60,6 +63,7 @@ class S3DFile(File):
                                           for _ in xrange(group.vertices)]))
         
         self.indx = s3d.Indx.parse(io)
+        enforce(self.indx.magic == 'INDX', ValueError, 'magic number mismatch')
         for _ in xrange(self.indx.groups):
             group = s3d.IndexGroup.parse(io)
             
@@ -67,11 +71,13 @@ class S3DFile(File):
                                          for _ in xrange(group.vertices/3)]))
         
         self.prim = s3d.Prim.parse(io)
+        enforce(self.prim.magic == 'PRIM', ValueError, 'magic number mismatch')
         for _ in xrange(self.prim.groups):
             self.primitives.append(s3d.PrimGroup.parse(io))
         
         
         self.mats = s3d.Mats.parse(io)
+        enforce(self.mats.magic == 'MATS', ValueError, 'magic number mismatch')
         Group = s3d.MaterialGTE15 if float(self.head.version) >= 1.5 \
                     else s3d.MaterialLT15
         for _ in xrange(self.mats.groups):
@@ -79,14 +85,17 @@ class S3DFile(File):
         
         
         self.anim = s3d.Anim.parse(io)
+        enforce(self.anim.magic == 'ANIM', ValueError, 'magic number mismatch')
         for _ in xrange(self.anim.groups):
             self.animations.append(s3d.AnimationGroup.parse(io))
         
         self.prop = s3d.Prop.parse(io)
+        enforce(self.prop.magic == 'PROP', ValueError, 'magic number mismatch')
         for _ in xrange(self.prop.groups):
             self.properties.append(s3d.PropertyGroup.parse(io))
         
         self.regp = s3d.Regp.parse(io)
+        enforce(self.regp.magic == 'REGP', ValueError, 'magic number mismatch')
         for _ in xrange(self.regp.effects):
             group = s3d.EffectGroup.parse(io)
             
@@ -119,12 +128,14 @@ class FSHFile(ImageFile):
         io = BytesIO(self.data)
         
         self.header = fsh.Header.parse(io)
+        enforce(self.header.magic == 'SHPI', ValueError, 'magic number mismatch')
         self.directory = fsh.Directory.parse(io)
         io.seek(self.directory.offset, SEEK_SET)
         
         self.entry_header = fsh.EntryHeader.parse(io)
         
-        #assert(self.entry_header.size == 0)
+        enforce(self.entry_header.size == 0, ValueError,
+                'corrupt fsh file or unimplemented feauture')
         compression = None
         if self.entry_header.record_id == 0x60:
             compression = squish.DXT1

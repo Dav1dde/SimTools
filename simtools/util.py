@@ -53,3 +53,8 @@ class BaseStruct(object):
                                ', '.join('{}={}'.format(field, 
                                                         getattr(self, field))
                                          for field in self._fields))
+    
+    
+def enforce(boolean, exception, *args, **kwargs):
+    if not boolean:
+        raise exception(*args, **kwargs)
