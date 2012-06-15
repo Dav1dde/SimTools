@@ -70,6 +70,18 @@ def _decompress(fileobj, length, uncompressed_size):
     return result
 
 
+def try_compress(data):
+    try:
+        compressed = compress(data)
+    except ValueError:
+        compressed = None
+        
+    if compressed is None or len(compressed) >= len(data):
+        return False, data
+    else:
+        return True, compressed
+        
+
 def compress(data):
     if hasattr(data, 'read'):
         data = data.read()
@@ -132,10 +144,10 @@ def _compress(data):
         new_compressed = ''
         if best_match_length:
             if buf:
-                new_compressed = ''.join(output_plain(buf))
+                new_compressed = ''.join(_output_plain(buf))
                 buf = ''
             
-            new_compressed += ''.join(output_offset(best_match_distance+best_match_length, best_match_length))
+            new_compressed += ''.join(_output_offset(best_match_distance+best_match_length, best_match_length))
             pos += best_match_length
         else:
             buf += data[pos]
@@ -143,12 +155,12 @@ def _compress(data):
         
         result += new_compressed
     
-    result += ''.join(output_plain(buf))
+    result += ''.join(_output_plain(buf))
     
     return result
 
 
-def output_plain(buf):
+def _output_plain(buf):
     sizes = [28, 24, 20, 16, 12, 8, 4, 3, 2, 1]
     
     while len(buf):
@@ -163,7 +175,7 @@ def output_plain(buf):
                 buf = buf[size:]
                 break
     
-def output_offset(offset, length):
+def _output_offset(offset, length):
     assert(length >= 3)
 
     if length <= 10 and offset <= 1024:

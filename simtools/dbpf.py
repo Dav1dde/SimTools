@@ -1,7 +1,7 @@
 from struct import Struct
 from os import SEEK_SET
 
-from simtools.qfs import decompress
+from simtools.qfs import decompress, try_compress
 from simtools.util import BaseStruct
 from simtools.magic import magic_index
 
@@ -51,6 +51,7 @@ class IndexBaseStruct(BaseStruct):
         BaseStruct.__init__(self, *args, **kwargs)
         
         self.compressed = False
+        self._file = None
         
     def open(self):
         self._fileobj.seek(self.location, SEEK_SET)
@@ -60,8 +61,16 @@ class IndexBaseStruct(BaseStruct):
             header, data = decompress(data)
         
         type = magic_index(self)
+        self._file = type.cls(data)
 
-        return type.cls(data)
+        return self._file
+
+    def dump(self):
+        if self._file is None:
+            self._fileobj.seek(self.location, SEEK_SET)
+            return self.compressed, self._fileobj.read(self.size)
+
+        return try_compress(self._file.raw())
     
     def __repr__(self):
         fields = self._fields + ['compressed']

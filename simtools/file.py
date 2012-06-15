@@ -13,6 +13,9 @@ class File(object):
     
     def __init__(self, data):
         self.data = data
+    
+    def raw(self):
+        return self.data
 
 
 class DIRFile(File):
@@ -102,7 +105,27 @@ class S3DFile(File):
             self.effects.append((group, [s3d.Effect.parse(io)
                                          for _ in xrange(group.effects)]))
             
+    
+    def raw(self):
+        raw_vertices = ''.join(group.raw() + ''.join(v.raw() for v in vertices)
+                               for group,vertices in self.vertices)
+        raw_indices = ''.join(group.raw() + ''.join(i.raw() for i in indices)
+                              for group,indices in self.indices)
+        raw_primitives = ''.join(p.raw() for p in self.primitives)
+        raw_materials = ''.join(mat.raw() for mat in self.materials)
+        raw_animations = ''.join(a.raw() for a in self.animations)
+        raw_properties = ''.join(p.raw() for p in self.properties)
+        raw_effects = ''.join(group.raw() + ''.join(e.raw() for e in effects)
+                              for group,effects in self.effects)
         
+        return ''.join([self.header.raw(), self.head.raw(),
+                        self.vert.raw(), raw_vertices,
+                        self.indx.raw(), raw_indices,
+                        self.prim.raw(), raw_primitives,
+                        self.mats.raw(), raw_materials,
+                        self.anim.raw(), raw_animations,
+                        self.prop.raw(), raw_properties,
+                        self.regp.raw(), raw_effects])
 
 
 class ImageFile(File):
@@ -146,6 +169,26 @@ class FSHFile(ImageFile):
             self.data = squish.decompress_image(self.data, self.entry_header.width,
                                                            self.entry_header.height,
                                                 compression)
+    
+    def raw(self):
+        self.directory.offset = fsh.Header._struct.size() + \
+                                fsh.Directory._struct.size()
+                                
+        compression = None
+        if self.entry_header.record_id == 0x60:
+            compression = squish.DXT1
+        elif self.entry_header.record_id == 0x61:
+            compression = squish.DXT3
+        
+        if not compression is None:
+            data = squish.compress_image(self.data, self.entry_header.width,
+                                                    self.entry_header.height,
+                                         compression)
+        else:
+            data = self.data        
+              
+        return ''.join([self.header.raw(), self.directory.raw(),
+                        self.entry_header.raw(), data])
     
     @property
     def size(self):
