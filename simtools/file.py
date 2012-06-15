@@ -171,8 +171,8 @@ class FSHFile(ImageFile):
                                                 compression)
     
     def raw(self):
-        self.directory.offset = fsh.Header._struct.size() + \
-                                fsh.Directory._struct.size()
+        self.directory.offset = fsh.Header._struct.size + \
+                                fsh.Directory._struct.size
                                 
         compression = None
         if self.entry_header.record_id == 0x60:

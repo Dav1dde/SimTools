@@ -27,7 +27,7 @@ def compress_image(rgba, width, height, flags):
     
     libsquish.CompressImage(byref(rgba), c_int(width), c_int(height), byref(buf), c_int(flags))
     
-    return buffer.raw
+    return buf.raw
 
 def decompress_image(block, width, height, flags):
     block = create_string_buffer(block)

@@ -210,7 +210,7 @@ def _output_offset(offset, length):
         opcode = pack('<B', opcode)
         bytes = pack('<BBB', byte1, byte2, byte3)        
     else:
-        raise ValueError('failed to compress data')
+        raise ValueError('failed to compress data') # TODO: FIX ME
     
     yield ''.join([opcode, bytes])
 

@@ -95,10 +95,6 @@ class Material(BaseStruct):
         
         return cls(fileobj, *(data + (name,)))
     
-    def raw(self):
-        return self._struct.pack(self._data.values()[:14]) + \
-            pack('<B{}s'.format(len(self.name)+1), len(self.name)+1, self.name + '\x00')
-
 
 class MaterialGTE15(Material):
     _struct = Struct('<I4BHI2BI4B2H')
@@ -120,6 +116,10 @@ class MaterialGTE15(Material):
                'animation_mode',
                'name']
     
+    def raw(self):
+        return self._struct.pack(*self._data.values()[:16]) + \
+            pack('<B{}s'.format(len(self.name)+1), len(self.name)+1, self.name + '\x00')
+    
 
 class MaterialLT15(Material):
     _struct = Struct('<I4BHI2BI2B2H')
@@ -138,6 +138,10 @@ class MaterialLT15(Material):
                'animation_rate',
                'animation_mode',
                'name']
+    
+    def raw(self):
+        return self._struct.pack(*self._data.values()[:14]) + \
+            pack('<B{}s'.format(len(self.name)+1), len(self.name)+1, self.name + '\x00')
 
 
 class Anim(BaseStruct):

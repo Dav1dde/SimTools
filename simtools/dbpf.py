@@ -65,7 +65,7 @@ class IndexBaseStruct(BaseStruct):
 
         return self._file
 
-    def dump(self):
+    def dump_file(self):
         if self._file is None:
             self._fileobj.seek(self.location, SEEK_SET)
             return self.compressed, self._fileobj.read(self.size)

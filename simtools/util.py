@@ -23,7 +23,6 @@ class BaseStruct(object):
         
         return cls(fileobj, *cls._struct.unpack(data))
     
-    @property
     def raw(self):
         return self._struct.pack(*self._data.values())
     
