@@ -166,7 +166,7 @@ class FSHFile(ImageFile):
             compression = squish.DXT3
         
         if not compression is None:
-            self.data = squish.decompress_image(self.data, self.entry_header.width,
+            self.data = squish.decompress_image(io.read(), self.entry_header.width,
                                                            self.entry_header.height,
                                                 compression)
     

@@ -104,7 +104,7 @@ def _compress(data):
     
     buf = ''
     
-    min_match_length = 3
+    min_match_length = 5
     max_string_length = 1028
     window_length = 1200
     best_match_length = 0
@@ -176,9 +176,7 @@ def _output_plain(buf):
                 break
     
 def _output_offset(offset, length):
-    assert(length >= 3)
-
-    if length <= 10 and offset <= 1024:
+    if 2 < length <= 10 and offset <= 1024:
         lower = (length - 3) << 2
         
         x = offset - 1

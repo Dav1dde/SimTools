@@ -1,14 +1,19 @@
 from struct import Struct
 from collections import OrderedDict
 from itertools import izip_longest
+from io import BufferedIOBase
 
 
 class BaseStruct(object):
     _struct = Struct('')
     _fields = []
 
-    def __init__(self, fileobj, *args):
-        self._fileobj = fileobj
+    def __init__(self, *args):
+        if args and isinstance(args[0], (file, BufferedIOBase)):
+            self._fileobj = args[0]
+            args = args[1:]
+        else:
+            self._fileobj = None
         
         self._data = OrderedDict()
 
