@@ -95,18 +95,16 @@ def compress(data):
     
     return ''.join([header, compressed])
 
-def _compress(data):
+def _compress(data): # TODO: Fix me
     # lz77 algorithm based on (14.6.2012):
     # https://github.com/olle/lz77-kit/blob/master/src/main/python/lz77.py
     # which is licensed under MIT
-    
     result = ''
-    
     buf = ''
     
-    min_match_length = 5
-    max_string_length = 1028
-    window_length = 1200
+    min_match_length = 3
+    max_string_length = 10
+    window_length = 1023
     best_match_length = 0
     
     pos = 0
@@ -208,25 +206,6 @@ def _output_offset(offset, length):
         opcode = pack('<B', opcode)
         bytes = pack('<BBB', byte1, byte2, byte3)        
     else:
-        raise ValueError('failed to compress data') # TODO: FIX ME
+        raise ValueError('failed to compress data')
     
     yield ''.join([opcode, bytes])
-
-
-
-if __name__ == '__main__':
-    data = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789abcefghijklmno'
-    print data, len(data)
-    compressed = _compress(data)
-    print repr(compressed), len(compressed)
-    decompressed = _decompress(BytesIO(compressed), len(compressed), len(data))
-    print decompressed
-    assert(data == decompressed)
-    
-    c = compress(data)
-    print repr(c)
-    header, uc = decompress(c)
-    print uc
-    print header
-    assert(data == uc)
-    

@@ -56,7 +56,7 @@ class S3DFile(File):
         
         self.header = s3d.Header.parse(io)
         self.head = s3d.Head.parse(io)
-        
+
         self.vert = s3d.Vert.parse(io)
         enforce(self.vert.magic == 'VERT', ValueError, 'magic number mismatch')
         for _ in xrange(self.vert.groups):

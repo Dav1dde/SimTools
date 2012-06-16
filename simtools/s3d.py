@@ -118,7 +118,7 @@ class MaterialGTE15(Material):
     
     def raw(self):
         return self._struct.pack(*self._data.values()[:16]) + \
-            pack('<B{}s'.format(len(self.name)+1), len(self.name)+1, self.name + '\x00')
+            pack('<B{}s'.format(len(self.name)), len(self.name), self.name+'\x00')
     
 
 class MaterialLT15(Material):
@@ -173,8 +173,8 @@ class AnimationGroup(BaseStruct):
         return cls(fileobj, name, flags, *indices)
 
     def raw(self):
-        return pack('<BB{}s4H'.format(len(self.name)+1),
-                    self.flags, len(self.name)+1, self.name + '\x00',
+        return pack('<BB{}s4H'.format(len(self.name)),
+                    len(self.name), self.flags, self.name,
                     self.vertex_block_index, self.index_block_index,
                     self.primitive_block_index, self.material_block_index)
 
@@ -203,11 +203,11 @@ class PropertyGroup(BaseStruct):
         return cls(fileobj, mesh_index, frame_number, type, property_name)
 
     def raw(self):
-        return pack('<2HB{}sB{}s'.format(len(self.type) + 1,
-                                         len(self.property) + 1),
+        return pack('<2HB{}sB{}s'.format(len(self.type),
+                                         len(self.property)),
                     self.mesh_index, self.frame_number,
-                    len(self.type)+1, self.type + '\x00',
-                    len(self.property_name)+1, self.property_name + '\x00')
+                    len(self.type), self.type,
+                    len(self.property_name), self.property_name)
 
 
 class Regp(BaseStruct):

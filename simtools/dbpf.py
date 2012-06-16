@@ -70,7 +70,8 @@ class IndexBaseStruct(BaseStruct):
             self._fileobj.seek(self.location, SEEK_SET)
             return self.compressed, self._fileobj.read(self.size)
 
-        return try_compress(self._file.raw())
+        #return try_compress(self._file.raw()) # TODO: fix compression, so reader can read it
+        return False, self._file.raw()
     
     def __repr__(self):
         fields = self._fields + ['compressed']

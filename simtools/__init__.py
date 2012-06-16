@@ -92,8 +92,6 @@ class DBPF(object):
             if index.type_id == 0xe86b1eef:
                 continue
             
-            indices.append(index)
-            
             compressed, data = index.dump_file()
             
             if compressed:
@@ -102,33 +100,34 @@ class DBPF(object):
                 del args['location']
                 if not index._file is None:
                     args['size'] = len(index._file.raw())
-                print index, args.values()
+
                 dirs.append(DIR(*args.values()).raw())
+                
+            indices.append(index)
             files.append(data)
-        
+
         indices_data = list() 
        
         offset = dbpf.Header._struct.size
         offset += len(indices)*Index._struct.size
-        offset += DIR._struct.size if compressed_files > 0 else 0
+        offset += Index._struct.size if compressed_files > 0 else 0
         
         for index, file in izip(indices, files):
             index.location = offset
+            index.size = len(file)
             indices_data.append(index.raw())
             
-            offset += len(file)
+            offset += index.size
         
         if compressed_files > 0:
             if version == '7.0':
-                size = 16
-                indices_data.append(Index(0xe86b1eef, 0xe86b1eef,
-                                          0x286b1f03, offset,
-                                          compressed_files*size).raw())
+                args = (0xe86b1eef, 0xe86b1eef, 0x286b1f03,
+                        offset, compressed_files*DIR._struct.size)
             else:
-                size = 20
-                indices_data.append(Index(0xe86b1eef, 0xe86b1eef, 0x286b1f03,
-                                          0x286b1f03, offset,
-                                          compressed_files*size).raw())
+                args = (0xe86b1eef, 0xe86b1eef, 0x286b1f03, 0x286b1f03,
+                        offset, compressed_files*DIR._struct.size)
+                
+            indices_data.append(Index(*args).raw())
             
         self.header.index_count = len(indices_data)
         self.header.index_offset = 96
